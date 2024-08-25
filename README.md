@@ -1,5 +1,4 @@
 # Auto-Timetable-Generation
-Project Title
 Timetable Generation with Binary Encoding
 
 Description
