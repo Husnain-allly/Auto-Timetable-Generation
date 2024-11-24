@@ -1,65 +1,20 @@
-name: Docker Build and Push
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
-on:
-  push:
-    branches:
-      - main  # Trigger on changes to the main branch
-    paths:
-      - Dockerfile
-      - requirements.txt
-      - '**/*.py'  # Add other paths relevant to your project
+# Set the working directory in the container
+WORKDIR /app
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    # Checkout the code from the repository
-    - name: Checkout code
-      uses: actions/checkout@v2
+# Copy the current directory contents into the container
+COPY . /app/
 
-    # Set up Docker Buildx for multi-platform builds
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+# Install any dependencies (if you have any, update accordingly)
+# If you need to install dependencies directly, you can add them here
+# For example, if using `pip`:
+# RUN pip install some-library-name
 
-    # Cache Docker layers to speed up builds
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+# Set the default command to run your app
+CMD ["python", "your_script.py"]
 
-    # Set up Docker for use in the workflow
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
-      with:
-        version: latest
-
-    # Log in to Docker Hub using GitHub secrets for authentication
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # Build and push the Docker image using Docker Buildx
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/timetable-generator:latest
-        build-args: |
-          GIT_AUTH_TOKEN=${{ secrets.GIT_AUTH_TOKEN }}
-
-    # Handle errors from the build process
-    - name: Run Docker build
-      run: |
-        docker buildx build --push --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/timetable-generator:latest .
-        
-    # Check if the build was successful and exit accordingly
     - name: Check build status
       if: failure()
       run: exit 1
