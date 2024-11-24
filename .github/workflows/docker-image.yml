@@ -53,17 +53,3 @@ jobs:
         build-args: |
           GIT_AUTH_TOKEN=${{ secrets.GIT_AUTH_TOKEN }}
 
-    # Handle errors from the build process
-    - name: Run Docker build
-      run: |
-        docker buildx build --push --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/timetable-generator:latest .
-        
-    # Check if the build was successful and exit accordingly
-    - name: Check build status
-      run: |
-        if [[ $? -ne 0 ]]; then
-          echo "Docker build failed!"
-          exit 1
-        else
-          echo "Docker build successful!"
-        fi
